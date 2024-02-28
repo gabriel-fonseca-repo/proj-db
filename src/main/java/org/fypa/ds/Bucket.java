@@ -1,5 +1,6 @@
 package org.fypa.ds;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -63,6 +64,7 @@ public class Bucket {
         return ((double) parte / total) * 100;
     }
 
+    @JsonIgnore
     public boolean isNotCheio() {
         return this.registros.size() < MAX_TAMANHO_BUCKET;
     }

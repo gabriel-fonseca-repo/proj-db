@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Scanner;
@@ -23,6 +25,8 @@ public class Main {
             Integer qtdLinhas = lerQtdLinhas(arquivoParaLer);
             ArrayList<Pagina> paginas = Pagina.carregarPaginas(arquivoParaLer, tamanhoPagina);
             ArrayList<Bucket> buckets = Bucket.carregarBucket(paginas, qtdLinhas);
+            String bucketJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(buckets);
+            Files.writeString(Path.of("src/main/resources/out.json"), bucketJson);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
