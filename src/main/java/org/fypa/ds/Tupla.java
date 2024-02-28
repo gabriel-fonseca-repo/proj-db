@@ -1,19 +1,18 @@
 package org.fypa.ds;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.naming.Binding;
+
 @Getter
 @Setter
-public class Tupla<ID, T> {
+@AllArgsConstructor
+public class Tupla {
 
-    private ID id;
+    private Integer indicePagina;
 
-    private T dados;
-
-    public Tupla(ID id, T dados) {
-        this.id = id;
-        this.dados = dados;
-    }
+    private String dados;
 
 }

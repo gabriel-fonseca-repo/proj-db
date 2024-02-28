@@ -3,44 +3,68 @@ package org.fypa.ds;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.Hashtable;
 
 @Getter
 @Setter
-public class Bucket<ID, T> {
+public class Bucket {
 
-    private ArrayList<Pagina<ID, T>> paginas;
+    private ArrayList<Tupla> registros;
 
-    private Integer tamanhoPagina;
+    public static final Integer MAX_TAMANHO_BUCKET = 10;
 
-    private Integer qtdPaginas;
+    public static Integer MAX_QTD_BUCKETS;
 
-    public Bucket(File arquivoParaLer, Integer tamanhoPagina, Integer qtdPaginas) throws FileNotFoundException {
-        this.tamanhoPagina = tamanhoPagina;
-        this.qtdPaginas = qtdPaginas;
-        this.carregarPaginas(arquivoParaLer);
+    public Bucket() {
+        this.registros = new ArrayList<>();
     }
 
-    private void carregarPaginas(File arquivoParaLer) throws FileNotFoundException {
-        Scanner sc = new Scanner(arquivoParaLer);
-        while (sc.hasNextLine()) {
-            String prox = sc.nextLine();
-            Integer hash = hash(prox);
-            if (this.paginas.get(hash) == null) {
-                // this.paginas.set(hash);
+    public static ArrayList<Bucket> carregarBucket(ArrayList<Pagina> paginas, Integer qtdLinhas) throws Exception {
+        ArrayList<Bucket> buckets = new ArrayList<>();
+
+        MAX_QTD_BUCKETS = (int) (double) (qtdLinhas / MAX_TAMANHO_BUCKET);
+
+        for (int i = 0; i < MAX_QTD_BUCKETS; i++)
+            buckets.add(new Bucket());
+
+        int colisoes = 0;
+
+        for (Pagina pagina : paginas) {
+            for (Tupla tupla : pagina.getDadosPagina()) {
+
+                int hash = Bucket.hash(tupla.getDados());
+
+                if (buckets.get(hash).isNotCheio()) {
+                    buckets.get(hash).getRegistros().add(tupla);
+                } else {
+                    colisoes += 1;
+                }
+
             }
         }
+
+        System.out.println("Porcentagem de colisão no preenchimento do Bucket: " + calcularPorcentagem(colisoes, qtdLinhas));
+        return buckets;
     }
 
-    private Integer hash(String dado) {
+    private static Integer hash(String dado) {
         int soma = 0;
         for (int i = 0; i < dado.length(); i++) {
-            soma += (int) dado.charAt(i);
+            soma = (31 * soma + dado.charAt(i)) % MAX_QTD_BUCKETS;
         }
-        return (soma * 92821) % this.qtdPaginas;
+        return soma;
+    }
+
+    public static double calcularPorcentagem(int parte, int total) {
+        if (total == 0) {
+            throw new IllegalArgumentException("Total não pode ser zero!");
+        }
+        return ((double) parte / total) * 100;
+    }
+
+    public boolean isNotCheio() {
+        return this.registros.size() < MAX_TAMANHO_BUCKET;
     }
 
 }
